@@ -1,0 +1,6 @@
+{
+  "name": "IELTS GRE Prep",
+  "description": "A premium IELTS and GRE preparation tool with prioritized flashcards, mistake history tracking, personalized learning metrics, and customized streak motivators.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
