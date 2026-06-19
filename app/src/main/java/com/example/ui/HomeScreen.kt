@@ -15,7 +15,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -392,6 +397,7 @@ fun PracticeTab(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -550,23 +556,29 @@ fun PracticeTab(
                     .padding(vertical = 4.dp)
             )
 
-            ScrollableTabRow(
-                selectedTabIndex = currentIndex,
-                edgePadding = 0.dp,
-                indicator = {},
-                divider = {},
+            val listState = rememberLazyListState()
+
+            LaunchedEffect(currentIndex) {
+                if (currentIndex >= 0 && currentIndex < words.size) {
+                    listState.animateScrollToItem(currentIndex)
+                }
+            }
+
+            LazyRow(
+                state = listState,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                words.forEachIndexed { idx, item ->
+                itemsIndexed(words, key = { _, item -> item.id }) { idx, item ->
                     val isSelected = idx == currentIndex
                     Surface(
                         color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                         shape = RoundedCornerShape(12.dp),
                         border = if (item.isMistakenLastTime) BorderStroke(1.5.dp, MaterialTheme.colorScheme.error) else null,
                         modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 4.dp)
+                            .padding(vertical = 4.dp)
                             .clickable { onWordSelect(idx) }
                     ) {
                         Row(
@@ -1206,7 +1218,7 @@ fun PracticeTab(
 }
 
 @Composable
-fun ColumnScope.CardContainer(
+fun CardContainer(
     word: WordEntity,
     isFlipped: Boolean,
     onFlip: () -> Unit
@@ -1220,7 +1232,7 @@ fun ColumnScope.CardContainer(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .weight(1f)
+            .height(350.dp)
             .graphicsLayer {
                 rotationY = rotation
                 cameraDistance = 12 * density
