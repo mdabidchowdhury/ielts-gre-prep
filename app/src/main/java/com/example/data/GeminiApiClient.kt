@@ -60,7 +60,8 @@ data class GeneratedWord(
     val definition: String,
     val example: String,
     val importance: Int,
-    val category: String = "Academic"
+    val category: String = "Academic",
+    val synonyms: String? = ""
 )
 
 @JsonClass(generateAdapter = true)

@@ -99,7 +99,7 @@ class VocabViewModel(private val repository: WordRepository) : ViewModel() {
         }
     }
 
-    fun addNewWord(word: String, phonetic: String, definition: String, example: String, type: String, importance: Int) {
+    fun addNewWord(word: String, phonetic: String, definition: String, example: String, type: String, importance: Int, synonyms: String = "") {
         viewModelScope.launch {
             if (word.isNotBlank() && definition.isNotBlank()) {
                 repository.insertCustomWord(
@@ -107,6 +107,7 @@ class VocabViewModel(private val repository: WordRepository) : ViewModel() {
                     phonetic = phonetic,
                     definition = definition,
                     example = example,
+                    synonyms = synonyms,
                     type = type,
                     importance = importance
                 )

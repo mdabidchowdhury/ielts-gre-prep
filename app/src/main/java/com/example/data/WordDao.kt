@@ -29,6 +29,12 @@ interface WordDao {
     @Query("SELECT COUNT(*) FROM words")
     suspend fun getWordCount(): Int
 
+    @Query("DELETE FROM words WHERE isCustom = 0")
+    suspend fun deleteAllNonCustomWords()
+
+    @Query("SELECT COUNT(*) FROM words WHERE example LIKE 'The student learned%'")
+    suspend fun getDummyExampleCount(): Int
+
     // User Stats queries
     @Query("SELECT * FROM user_stats WHERE id = 1 LIMIT 1")
     fun getUserStatsFlow(): Flow<UserStatsEntity?>

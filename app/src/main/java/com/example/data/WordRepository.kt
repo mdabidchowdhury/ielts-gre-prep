@@ -16,12 +16,13 @@ class WordRepository(
 
     fun getUserStats(): Flow<UserStatsEntity?> = wordDao.getUserStatsFlow()
 
-    suspend fun insertCustomWord(word: String, phonetic: String, definition: String, example: String, type: String, importance: Int) {
+    suspend fun insertCustomWord(word: String, phonetic: String, definition: String, example: String, synonyms: String, type: String, importance: Int) {
         val wordEntity = WordEntity(
             word = word.trim(),
             phonetic = phonetic.trim(),
             definition = definition.trim(),
             example = example.trim(),
+            synonyms = synonyms.trim(),
             type = type,
             importance = importance,
             isCustom = true
@@ -262,10 +263,18 @@ class WordRepository(
     }
 
     suspend fun checkAndSeedDatabase() {
-        val ieltsSeeds = loadWordsFromRawResource(com.example.R.raw.ielts_words, "IELTS")
-        val greSeeds = loadWordsFromRawResource(com.example.R.raw.gre_words, "GRE")
-        wordDao.insertWords(ieltsSeeds)
-        wordDao.insertWords(greSeeds)
+        val totalCount = wordDao.getWordCount()
+        val dummyCount = wordDao.getDummyExampleCount()
+        
+        // If the database has 0 words, or has dummy sentences, or is suffering from the duplicate bug (e.g. >3000 words),
+        // we clear the non-custom words and re-seed them from the raw resources.
+        if (totalCount == 0 || dummyCount > 0 || totalCount > 3000) {
+            wordDao.deleteAllNonCustomWords()
+            val ieltsSeeds = loadWordsFromRawResource(com.example.R.raw.ielts_words, "IELTS")
+            val greSeeds = loadWordsFromRawResource(com.example.R.raw.gre_words, "GRE")
+            wordDao.insertWords(ieltsSeeds)
+            wordDao.insertWords(greSeeds)
+        }
 
         val currentStats = wordDao.getUserStats()
         if (currentStats == null) {
@@ -305,7 +314,8 @@ class WordRepository(
                       "definition": "accurate academic dictionary definition",
                       "example": "An engaging, deep sentence showing exactly how to use the word in an academic writing context.",
                       "importance": 3,
-                      "category": "Academic"
+                      "category": "Academic",
+                      "synonyms": "comma separated synonyms"
                     }
                   ]
                 }
@@ -337,6 +347,7 @@ class WordRepository(
                                 type = "IELTS",
                                 importance = it.importance.coerceIn(1, 3),
                                 category = it.category.trim(),
+                                synonyms = it.synonyms?.trim() ?: "",
                                 isCustom = true
                             )
                         }
@@ -380,8 +391,9 @@ class WordRepository(
                         val wordVal = parts[0].trim()
                         val defVal = parts[1].trim()
                         if (wordVal.isNotEmpty() && defVal.isNotEmpty()) {
-                            val phoneticVal = "/${wordVal.lowercase()}/"
-                            val sentenceVal = "The student learned the meaning of the word '${wordVal}' during their prep."
+                            val phoneticVal = if (parts.size >= 3 && parts[2].isNotBlank()) parts[2].trim() else "/${wordVal.lowercase()}/"
+                            val sentenceVal = if (parts.size >= 4 && parts[3].isNotBlank()) parts[3].trim() else "The student learned the meaning of the word '${wordVal}' during their prep."
+                            val synonymsVal = if (parts.size >= 5 && parts[4].isNotBlank()) parts[4].trim() else ""
                             list.add(
                                 WordEntity(
                                     word = wordVal,
@@ -390,7 +402,8 @@ class WordRepository(
                                     example = sentenceVal,
                                     type = type,
                                     importance = (2..3).random(),
-                                    category = "Academic"
+                                    category = "Academic",
+                                    synonyms = synonymsVal
                                 )
                             )
                         }

@@ -12,6 +12,7 @@ data class WordEntity(
     val example: String,
     val type: String, // "IELTS" or "GRE"
     val importance: Int, // 1 = Low, 2 = Medium, 3 = High
+    val synonyms: String = "",
     val appearedCount: Int = 0,
     val correctCount: Int = 0,
     val wrongCount: Int = 0,

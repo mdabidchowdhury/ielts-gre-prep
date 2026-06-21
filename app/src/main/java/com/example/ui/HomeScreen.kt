@@ -1225,7 +1225,7 @@ fun CardContainer(
 ) {
     val rotation by animateFloatAsState(
         targetValue = if (isFlipped) 180f else 0f,
-        animationSpec = tween(durationMillis = 400),
+        animationSpec = tween(durationMillis = 150),
         label = "rotation"
     )
 
@@ -1466,8 +1466,25 @@ fun CardContainer(
                         text = word.definition,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
+                        modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
                     )
+
+                    if (word.synonyms.isNotBlank()) {
+                        Text(
+                            text = "SYNONYMS",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp,
+                            letterSpacing = 1.sp,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+
+                        Text(
+                            text = word.synonyms,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+                        )
+                    }
 
                     Text(
                         text = "SAMPLE SENTENCE",
